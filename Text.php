@@ -89,18 +89,6 @@ function makeNewLines($text) {
     return $text;
 }
 
-/*
-sergoy
- е
-    о
-     у
- е  о
- е   у
-    оу
- е  оу
-
-*/
-
 function array_to_sql_string($arr){
     $quoted_arr = array();
     foreach($arr as $value){
