@@ -14,12 +14,9 @@
                 </script>
                 <li class="list-group-item">
                     <div class="btn-group pull-right">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            Send <span class="caret"></span>
+                        <button type="button" onclick="return vkProxy.sendMsg(<?=intval($_GET['id'])?>);" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Send
                         </button>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a href="#" onclick="return vkProxy.sendMsg(<?=intval($_GET['id'])?>);">just send</a></li>
-                        </ul>
                     </div>
                     <div style="clear: both"></div>
                 </li>
