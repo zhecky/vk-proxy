@@ -1,7 +1,0 @@
-AuthType Basic
-AuthName "/www/vkproxy.zhecky.net/webstat"
-AuthUserFile /var/www/zhecky/data/etc/209841.passwd
-DirectoryIndex index.html
-<Limit GET POST>
-	require valid-user
-</Limit>
