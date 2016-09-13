@@ -80,7 +80,7 @@
                             Action <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="#" onclick="return vkProxy.markChatAsRead(<?=abs($chat_id)?>)">Mark as read</a></li>
+                            <li><a href="#" onclick="return vkProxy.markChatAsRead(<?=($value['message']['chat_id'] > 0) ? 200000000 + abs($chat_id) : abs($chat_id)?>)">Mark as read</a></li>
                         </ul>
 
                     </div>
