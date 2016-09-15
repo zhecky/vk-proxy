@@ -8,3 +8,5 @@ RewriteRule ^conversations$ index.php?act=conversations [QSA,L]
 RewriteRule ^chat/(\-?\d+)$ index.php?act=chat&id=$1 [QSA,L]
 RewriteRule ^struct$ index.php?act=conversations_old [QSA,L]
 RewriteRule ^counters$ index.php?act=counters [QSA,L]
+
+RedirectMatch 404 /\.git
