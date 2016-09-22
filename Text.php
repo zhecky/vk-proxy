@@ -161,229 +161,57 @@ function toUTF8($text) {
     return iconv("windows-1251", "utf-8", $text);
 }
 
+/**
+ * @param $date int
+ * @return string
+ */
 function dateDiffNow($date) {
-    $diff_str = '';
     $now = time();
     if (!$date) {
-        return 'Док міняє час';
+        return 'док міняє час';
     }
 
     $year = date('Y', $date);
     $month = date('m', $date);
     $day_of_year = date('z', $date);
-    $day = date('d', $date);
+    $now_day_of_year = date('z');
+
+    $day = date('j', $date); // date('d') без ведущего ноля
     $hour = date('G', $date);
     $minute = date('i', $date);
-
-    $now_hour = date('G');
-    $now_day = date('z');
-    $now_month = date('m');
-    $now_year = date('Y');
 
     $diff_sec = $now - $date;
     $diff_day = (string)floor($diff_sec / 60 / 60 / 24);
     $diff_hour = (string)floor(($diff_sec / 60 / 60) - ($diff_day * 24));
-    $diff_min = (string)floor(($diff_sec / 60));
+    $diff_min = floor(($diff_sec / 60));
 
-    $ago = ' тому';
+    $at = (date('G', $date) == 11) ? ' об ' : ' о ';
 
-
-    $eleven = date('G', $date);
-
-    if ($eleven == 11) {
-        $at = ' об ';
-    } else {
-        $at = ' о ';
-    }
-
-    if ($diff_sec < 60 && $diff_sec >= 0) {
-        $diff_str = 'менше хвилини' . $ago;
-
-    } elseif ($diff_sec >= 60 && $diff_sec < 3600) {
-
-        //Різниця в хвилинах
-
-        if ($diff_min == "11" || $diff_min == "12" || $diff_min == "13" || $diff_min == "14") {
-            $diff_str = " хвилин";
-        } elseif ($diff_min[strlen($diff_min) - 1] == "2" || $diff_min[strlen($diff_min) - 1] == "3" || $diff_min[strlen($diff_min) - 1] == "4") {
-            $diff_str = " хвилини";
-        } elseif ($diff_min[strlen($diff_min) - 1] == "1") {
-            $diff_str = " хвилину";
+    if ($diff_sec >= 0 && $diff_sec < 60) {
+        $diff_str = 'менше хвилини тому';
+    } else if ($diff_sec >= 60 && $diff_sec < 3600) {
+        if ($diff_min % 10 == 1 && $diff_min != 11) {
+            $diff_str =  ' хвилину';
         } else {
-            $diff_str = " хвилин";
+            $diff_str = ($diff_min % 10 >= 2 && $diff_min % 10 <= 4 && ($diff_min < 12 || $diff_min > 14)) ? ' хвилини' : ' хвилин';
         }
-        $diff_str = $diff_min . $diff_str . $ago;
-    } elseif ($diff_sec >= 3600 AND $diff_sec < 3600 * 4) {
-        if ($diff_hour == 1) {
-            $diff_str = " годину";
-        } else {
-            $diff_str = " години";
-        }
-        $diff_str = $diff_hour . $diff_str . $ago;
+        $diff_str = $diff_min . $diff_str . ' тому';
+    } else if ($diff_sec >= 3600 && $diff_sec < 3600 * 4) {
+        $diff_str = (($diff_hour == 1) ? " годину" : $diff_hour . " години") . ' тому';
     } else {
-        if ($day_of_year == $now_day) {
+        if ($day_of_year == $now_day_of_year && $year == date('Y')) {
             $diff_str = 'сьогодні ' . $at . $hour . ':' . $minute;
-        } elseif ($day_of_year == $now_day - 1 || $now_day - 1 <= 0) {
-
+        } else if ($day_of_year == $now_day_of_year - 1 || ($now_day_of_year - 1 == -1 && date('d/m', $date) == '31/12' && date('Y', $date) == date('Y') - 1)) {
             $diff_str = 'вчора ' . $at . $hour . ':' . $minute;
         } else {
-            switch ((int)$month) {
-                case 1:
-                    $month = ' січня ';
-                    break;
-                case 2:
-                    $month = ' лютого ';
-                    break;
-                case 3:
-                    $month = ' березня ';
-                    break;
-                case 4:
-                    $month = ' квітня ';
-                    break;
-                case 5:
-                    $month = ' травня ';
-                    break;
-                case 6:
-                    $month = ' червня ';
-                    break;
-                case 7:
-                    $month = ' липня ';
-                    break;
-                case 8:
-                    $month = ' серпня ';
-                    break;
-                case 9:
-                    $month = ' вересня ';
-                    break;
-                case 10:
-                    $month = ' жовтня ';
-                    break;
-                case 11:
-                    $month = ' листопада ';
-                    break;
-                case 12:
-                    $month = ' грудня ';
-                    break;
-            }
-            $diff_str = $day . $month . $year . $at . $hour . ':' . $minute;
+            $months = ['січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
+            $month = " {$months[$month-1]} ";
+            $diff_str = $day . $month . (($year != date('Y')) ? $year : ' ')  . $at . $hour . ':' . $minute;
         }
-
     }
+
     return $diff_str;
-
 }
-
-function dateDiffNowShort($date) {
-    $diff_str = '';
-    $now = time();
-    if (!$date) return 'Doc changes time..';
-
-
-    $year = date('Y', $date);
-    $month = date('m', $date);
-    $day_of_year = date('z', $date);
-    $day = date('d', $date);
-    $hour = date('G', $date);
-    $minute = date('i', $date);
-
-    $now_hour = date('G');
-    $now_day = date('z');
-    $now_month = date('m');
-    $now_year = date('Y');
-
-    $diff_sec = $now - $date;
-    $diff_day = (string)floor($diff_sec / 60 / 60 / 24);
-    $diff_hour = (string)floor(($diff_sec / 60 / 60) - ($diff_day * 24));
-    $diff_min = (string)floor(($diff_sec / 60));
-
-    $ago = '';
-
-
-    $eleven = date('G', $date);
-
-    if ($eleven == 11) { // zhecky, wat?
-        $at = ' ';
-    } else {
-        $at = ' ';
-    }
-
-    if ($diff_sec < 60 && $diff_sec >= 0) {
-        $diff_str = 'менше хвилини' . $ago;
-
-    } elseif ($diff_sec >= 60 && $diff_sec < 3600) {
-
-        //Різниця в хвилинах
-
-        if ($diff_min == "11" || $diff_min == "12" || $diff_min == "13" || $diff_min == "14") {
-            $diff_str = " хв";
-        } elseif ($diff_min[strlen($diff_min) - 1] == "2" || $diff_min[strlen($diff_min) - 1] == "3" || $diff_min[strlen($diff_min) - 1] == "4") {
-            $diff_str = " хв";
-        } elseif ($diff_min[strlen($diff_min) - 1] == "1") {
-            $diff_str = " хв";
-        } else {
-            $diff_str = " хв";
-        }
-        $diff_str = $diff_min . $diff_str . $ago;
-    } elseif ($diff_sec >= 3600 AND $diff_sec < 3600 * 4) {
-        if ($diff_hour == 1) {
-            $diff_str = " год";
-        } else {
-            $diff_str = " год";
-        }
-        $diff_str = $diff_hour . $diff_str . $ago;
-    } else {
-        if ($day_of_year == $now_day) {
-            $diff_str = ' ' . $at . $hour . ':' . $minute;
-        } elseif ($day_of_year == $now_day - 1 || $now_day - 1 <= 0) {
-
-            $diff_str = 'вчора ' . $at . $hour . ':' . $minute;
-        } else {
-            switch ((int)$month) {
-                case 1:
-                    $month = ' січня ';
-                    break;
-                case 2:
-                    $month = ' лютого ';
-                    break;
-                case 3:
-                    $month = ' березня ';
-                    break;
-                case 4:
-                    $month = ' квітня ';
-                    break;
-                case 5:
-                    $month = ' травня ';
-                    break;
-                case 6:
-                    $month = ' червня ';
-                    break;
-                case 7:
-                    $month = ' липня ';
-                    break;
-                case 8:
-                    $month = ' серпня ';
-                    break;
-                case 9:
-                    $month = ' вересня ';
-                    break;
-                case 10:
-                    $month = ' жовтня ';
-                    break;
-                case 11:
-                    $month = ' листопада ';
-                    break;
-                case 12:
-                    $month = ' грудня ';
-                    break;
-            }
-            $diff_str = $day . '/' . date('m', $date) . '/' . $year . $at . $hour . ':' . $minute;
-        }
-
-    }
-    return $diff_str;
-
-}
-
 
 /**
  * Wraping words, but ignore html tags
