@@ -1,3 +1,7 @@
+ <?
+ $is_chat = $_GET['id'] < 0;
+ $id = abs($_GET['id']);
+ ?>
     <div class="panel panel-default">
         <div class="panel-heading">
             <a class="pull-right" href="" onclick="document.location.reload(); return false;"><span class="glyphicon glyphicon-refresh"></span></a>
@@ -13,6 +17,11 @@
                     });
                 </script>
                 <li class="list-group-item">
+                    <div class="btn-group pull-left">
+                        <button type="button" onclick="return vkProxy.markChatAsRead(<?=($is_chat) ? 2000000000 + $id : $id ?>);" class="btn btn-default">
+                            Mark as read
+                        </button>
+                    </div>
                     <div class="btn-group pull-right">
                         <button type="button" onclick="return vkProxy.sendMsg(<?=intval($_GET['id'])?>);" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                             Send
@@ -24,19 +33,14 @@
         <div class="panel-body">
 
 <?
-
-$id = abs($_GET['id']);
-
-if($_GET['id'] > 0) {
-    $conv = json_decode(file_get_contents("https://api.vk.com/method/messages.getHistory?user_id={$id}&count=200&access_token=".ACCESS_TOKEN."&v=5.27"), true);
-} else {
+if($is_chat) {
     $conv = json_decode(file_get_contents("https://api.vk.com/method/messages.getHistory?chat_id={$id}&count=200&access_token=".ACCESS_TOKEN."&v=5.27"), true);
+} else {
+    $conv = json_decode(file_get_contents("https://api.vk.com/method/messages.getHistory?user_id={$id}&count=200&access_token=".ACCESS_TOKEN."&v=5.27"), true);
 }
 
-
-
 $uids = "";
-foreach($conv['response']['items'] as $value) {
+foreach ($conv['response']['items'] as $value) {
     $author_id = $value['from_id'] ? $value['from_id'] : $value['user_id'];
     $uids .= ($uids == "" ? "" : ",").$author_id;
 }
@@ -97,26 +101,11 @@ foreach($conv['response']['items'] as $value) {
                 <span class="label label-danger">new</span>
             <? } ?>
             <div class="pull-right"><?=dateDiffNow($value['date'])?></div>
-            <!--<div class="btn-group pull-right ">
-
-                <button type="button" class="btn btn-default">Open</button>
-
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    Action <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    <li><a href="#" onclick="return vkProxy.markMessageAsRead(<?/*=$value['id']*/?>)">Mark as read</a></li>
-                </ul>
-
-            </div>
-            <div style="clear: both"></div>-->
         </div>
     </div>
 
 <?
-
 }
-
 ?>
         </div>
     </div>
