@@ -13,18 +13,18 @@ require "util.php";
 switch($_POST['act']) {
 
     case 'message.send' :
-        $result['s'] = postVKMessage($_POST['id'], $_POST['msg'], ACCESS_TOKEN) > 0 ? 1 : -1;
+        $result['s'] = postVKMessage($_POST['id'], $_POST['msg']) > 0 ? 1 : -1;
         break;
 
     case 'message.markAsRead' :
-        $result['s'] = markAsReadVKMessage($_POST['id'], ACCESS_TOKEN) ? 1 : -1;
+        $result['s'] = markAsReadVKMessage($_POST['id']) ? 1 : -1;
         break;
 
     case 'chat.markAsRead' :
-        $result['s'] = markAsReadVKChat(intval($_POST['id']), ACCESS_TOKEN) ? 1 : -1;
+        $result['s'] = markAsReadVKChat(intval($_POST['id'])) ? 1 : -1;
         break;
     case 'status.set' :
-        $result['s'] = setVKStatus($_POST['msg'], ACCESS_TOKEN) ? 1 : -1;
+        $result['s'] = setVKStatus($_POST['msg']) ? 1 : -1;
         break;
 
     default:

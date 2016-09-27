@@ -33,29 +33,26 @@
         <div class="panel-body">
 
 <?
-if($is_chat) {
-    $conv = json_decode(file_get_contents("https://api.vk.com/method/messages.getHistory?chat_id={$id}&count=200&access_token=".ACCESS_TOKEN."&v=5.27"), true);
-} else {
-    $conv = json_decode(file_get_contents("https://api.vk.com/method/messages.getHistory?user_id={$id}&count=200&access_token=".ACCESS_TOKEN."&v=5.27"), true);
+$messages = $vk->api('messages.getHistory', [
+   'count' => 200,
+    ($is_chat ? 'chat_id' : 'user_id') => $id
+]);
+
+$uids = [];
+foreach ($messages as $value) {
+    $uids[] = $value['from_id'] ? $value['from_id'] : $value['user_id'];
 }
 
-$uids = "";
-foreach ($conv['response']['items'] as $value) {
-    $author_id = $value['from_id'] ? $value['from_id'] : $value['user_id'];
-    $uids .= ($uids == "" ? "" : ",").$author_id;
-}
+$users = $vk->api('users.get', ['user_ids' => implode(',', $uids), 'https' => 1, 'fields' => 'photo_50'], false);
 
-$vkUserResponse = json_decode(file_get_contents("https://api.vk.com/method/users.get?user_ids={$uids}&https=1&fields=photo_50&v=5.27"), true);
+$user_data = [];
 
-$user_data = array();
-
-foreach($vkUserResponse['response'] as $value) {
+foreach($users as $value) {
     $user_data["{$value['id']}"]['photo'] = $value['photo_50'];
-    $user_data["{$value['id']}"]['name'] = $value['first_name']." ".$value['last_name'];
+    $user_data["{$value['id']}"]['name'] = "{$value['first_name']} {$value['last_name']}";
 }
 
-foreach($conv['response']['items'] as $value) {
-
+foreach($messages as $value) {
     $author_id = $value['from_id'] ? $value['from_id'] : $value['user_id'];
     ?>
     <div class="panel panel-default">

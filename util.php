@@ -6,6 +6,7 @@
  * Time: 20:44
  */
 
+require_once "core/class/VK.php";
 require_once "Text.php";
 
 
@@ -13,74 +14,38 @@ require_once "Text.php";
 define("CLIENT_PASS", "vdghdfgsdhsrgbzdfbsdh6576gawyw46u357iuw45");
 define("ACCESS_TOKEN", $_COOKIE['vk_token'] ? decodeString($_COOKIE['vk_token'], CLIENT_PASS) : "");
 
-function postVKMessage($id, $text, $access_token) {
+function postVKMessage($id, $text) {
+    $vk = new VK();
 
-    $params = array(
-        "access_token" => $access_token,
+    $params = [
         "message" => $text
-    );
+    ];
 
-    if($id > 0) {
+    if ($id > 0) {
         $params['user_id'] = $id;
     } else {
         $params['chat_id'] = abs($id);
     }
 
-    $res = json_decode(httpPostMessage("https://api.vk.com/method/messages.send", $params), true);
-
-    return $res['response'];
+    return $vk->api('messages.send', $params, false);
 }
 
-function markAsReadVKMessage($id, $access_token) {
+function markAsReadVKMessage($id) {
+    $vk = new VK();
 
-    $params = array(
-        "access_token" => $access_token,
-        'message_ids' => $id
-    );
-
-    $res = json_decode(httpPostMessage("https://api.vk.com/method/messages.markAsRead", $params), true);
-
-    return $res['response'];
+    return $vk->api('messages.markAsRead', ['message_ids' => $id], false);
 }
 
-function markAsReadVKChat($id, $access_token) {
+function markAsReadVKChat($id) {
+    $vk = new VK();
 
-    $params = array(
-        "access_token" => $access_token,
-        'peer_id' => $id
-    );
-
-    $res = json_decode(httpPostMessage("https://api.vk.com/method/messages.markAsRead", $params), true);
-
-    return $res['response'];
+    return $vk->api('messages.markAsRead', ['peer_id' => $id], false);
 }
 
-function setVKStatus($text, $access_token) {
-    $params = array(
-        "text" => $text,
-        "access_token" => $access_token
-    );
+function setVKStatus($text) {
+    $vk = new VK();
 
-    $res = json_decode(httpPostMessage("https://api.vk.com/method/status.set", $params), true);
-
-    return $res['response'];
-}
-
-function httpPostMessage($url, $params) {
-
-    $postData = http_build_query($params);
-    $opts = array('http' =>
-        array(
-            'method' => 'POST',
-            'header' => 'Content-type: application/x-www-form-urlencoded',
-            'content' => $postData
-        )
-    );
-
-    $context = stream_context_create($opts);
-
-    return file_get_contents($url, false, $context);
-
+    return $vk->api('status.set', ['text' => $text], false);
 }
 
 /**
@@ -88,10 +53,14 @@ function httpPostMessage($url, $params) {
  * @return bool
  */
 function isAccessTokenValid($access_token) {
-    $data = json_decode(file_get_contents("https://api.vk.com/method/users.get?access_token={$access_token}"), true);
-    return $data['response'] && $data['response'][0] && intval($data['response'][0]['uid']) > 0;
+    $vk = new VK();
+    $response = $vk->api('users.get', ['access_token' => $access_token], false);
+
+    return (isset($response[0]) && intval($response[0]['uid']) > 0);
 }
 function getAppPermissions($access_token) {
-    $data = json_decode(file_get_contents("https://api.vk.com/method/account.getAppPermissions?access_token={$access_token}"), true);
-    return intval($data['response']);
+    $vk = new VK();
+    $response = $vk->api('account.getAppPermissions', ['access_token' => $access_token], false);
+
+    return intval($response);
 }
