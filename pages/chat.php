@@ -41,9 +41,14 @@ $messages = $vk->api('messages.getHistory', [
 $uids = [];
 foreach ($messages as $value) {
     $uids[] = $value['from_id'] ? $value['from_id'] : $value['user_id'];
+    if (isset($value['fwd_messages'])) {
+        foreach($value['fwd_messages'] as $fwd_msg) {
+            $uids[] = $fwd_msg['user_id'];
+        }
+    }
 }
 
-$users = $vk->api('users.get', ['user_ids' => implode(',', $uids), 'https' => 1, 'fields' => 'photo_50'], false);
+$users = $vk->api('users.get', ['user_ids' => implode(',', array_unique($uids)), 'https' => 1, 'fields' => 'photo_50'], false);
 
 $user_data = [];
 
@@ -80,7 +85,7 @@ foreach($messages as $value) {
             <? } ?>
             <? if($value['fwd_messages']){ ?>
                 <li class="list-group-item">
-                    <pre><? print_r($value['fwd_messages'])?></pre>
+                    <? makeFwdMessagesDOM($value['fwd_messages'], $user_data); ?>
                 </li>
             <? } ?>
         </ul>
@@ -106,3 +111,34 @@ foreach($messages as $value) {
 ?>
         </div>
     </div>
+ <?
+
+ function makeFwdMessagesDOM($messages, $user_data) {
+     $messages = array_reverse($messages);
+     foreach($messages as $val) {
+            ?>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="media">
+                        <a target="_blank" class="media-left" href="//vk.com/id<?= $val['user_id'] ?>">
+                            <img src="<?= $user_data["" . $val['user_id']]['photo'] ?>" alt="...">
+                        </a>
+                        <div class="media-body">
+                            <h5 class="media-heading">
+                                <?= $user_data["" . $val['user_id']]['name'] ?>
+                            </h5>
+                            <?
+                            if (isset($val['fwd_messages'])) {
+                                makeFwdMessagesDOM($val['fwd_messages'], $user_data);
+                            } else {
+                                echo normText($val['body']);
+                            }
+                            ?>
+                        </div>
+                    </div>
+                    <span class="pull-right"><?=dateDiffNow($val['date'])?></span>
+                </div>
+            </div>
+ <?
+     }
+ }

@@ -42,7 +42,13 @@
                                     <span class="label label-default"><?= $value['message']['title'] ?></span>
                                 <? } ?>
                             </h5>
-                            <?= normText($value['message']['body']) ?>
+                            <?
+                                if (isset($value['message']['fwd_messages'])) {
+                                    echo '<span class="label label-info">forwarded messages</span>';
+                                } else {
+                                    echo normText($value['message']['body']);
+                                }
+                            ?>
                         </div>
                     </div>
                 </div>
