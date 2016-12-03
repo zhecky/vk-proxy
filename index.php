@@ -4,8 +4,10 @@ ini_set('default_socket_timeout', 2);
 
 require_once "util.php";
 
-if(ACCESS_TOKEN){
-    $counters = json_decode(file_get_contents("https://api.vk.com/method/account.getCounters?access_token=".ACCESS_TOKEN."&v=5.27"), true);
+$vk = new VK();
+
+if(ACCESS_TOKEN) {
+    $counters = $vk->api('account.getCounters', [], false);
 }
 
 ?>
@@ -66,7 +68,7 @@ if(ACCESS_TOKEN){
         <? if(ACCESS_TOKEN) { ?>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/conversations">Conversations<?if($counters['response']['messages'] > 0) {?> <span class="label label-primary"><?=$counters['response']['messages']?></span><?}?></a></li>
+                <li><a href="/conversations">Conversations<?if($counters['messages'] > 0) {?> <span class="label label-primary"><?=$counters['messages']?></span><?}?></a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> Debug
                         <span class="caret"></span></a>

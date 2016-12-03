@@ -10,24 +10,19 @@
 
         <?
 
-        $conv = json_decode(file_get_contents("https://api.vk.com/method/messages.getDialogs?access_token=".ACCESS_TOKEN."&v=5.27"), true);
+        $conversations = $vk->api('messages.getDialogs');
+        $uids = implode(',', array_column(array_column($conversations, 'message'), 'user_id'));
 
-
-        $uids = "";
-        foreach ($conv['response']['items'] as $value) {
-            $uids .= ($uids == "" ? "" : ",") . $value['message']['user_id'];
-        }
-
-        $vkUserResponse = json_decode(file_get_contents("https://api.vk.com/method/users.get?user_ids={$uids}&https=1&fields=photo_50&v=5.27"), true);
+        $users = $vk->api("users.get", ['user_ids' => $uids, 'https' => '1', 'fields' => 'photo_50'], false);
 
         $user_data = array();
 
-        foreach ($vkUserResponse['response'] as $value) {
+        foreach ($users as $value) {
             $user_data["{$value['id']}"]['photo'] = $value['photo_50'];
             $user_data["{$value['id']}"]['name'] = $value['first_name'] . " " . $value['last_name'];
         }
 
-        foreach ($conv['response']['items'] as $value) {
+        foreach ($conversations as $value) {
 
             $author_id = $value['message']['user_id'];
 
@@ -47,7 +42,13 @@
                                     <span class="label label-default"><?= $value['message']['title'] ?></span>
                                 <? } ?>
                             </h5>
-                            <?= normText($value['message']['body']) ?>
+                            <?
+                                if (isset($value['message']['fwd_messages'])) {
+                                    echo '<span class="label label-info">forwarded messages</span>';
+                                } else {
+                                    echo normText($value['message']['body']);
+                                }
+                            ?>
                         </div>
                     </div>
                 </div>

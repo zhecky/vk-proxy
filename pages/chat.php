@@ -33,29 +33,31 @@
         <div class="panel-body">
 
 <?
-if($is_chat) {
-    $conv = json_decode(file_get_contents("https://api.vk.com/method/messages.getHistory?chat_id={$id}&count=200&access_token=".ACCESS_TOKEN."&v=5.27"), true);
-} else {
-    $conv = json_decode(file_get_contents("https://api.vk.com/method/messages.getHistory?user_id={$id}&count=200&access_token=".ACCESS_TOKEN."&v=5.27"), true);
+$messages = $vk->api('messages.getHistory', [
+   'count' => 200,
+    ($is_chat ? 'chat_id' : 'user_id') => $id
+]);
+
+$uids = [];
+foreach ($messages as $value) {
+    $uids[] = $value['from_id'] ? $value['from_id'] : $value['user_id'];
+    if (isset($value['fwd_messages'])) {
+        foreach($value['fwd_messages'] as $fwd_msg) {
+            $uids[] = $fwd_msg['user_id'];
+        }
+    }
 }
 
-$uids = "";
-foreach ($conv['response']['items'] as $value) {
-    $author_id = $value['from_id'] ? $value['from_id'] : $value['user_id'];
-    $uids .= ($uids == "" ? "" : ",").$author_id;
-}
+$users = $vk->api('users.get', ['user_ids' => implode(',', array_unique($uids)), 'https' => 1, 'fields' => 'photo_50'], false);
 
-$vkUserResponse = json_decode(file_get_contents("https://api.vk.com/method/users.get?user_ids={$uids}&https=1&fields=photo_50&v=5.27"), true);
+$user_data = [];
 
-$user_data = array();
-
-foreach($vkUserResponse['response'] as $value) {
+foreach($users as $value) {
     $user_data["{$value['id']}"]['photo'] = $value['photo_50'];
-    $user_data["{$value['id']}"]['name'] = $value['first_name']." ".$value['last_name'];
+    $user_data["{$value['id']}"]['name'] = "{$value['first_name']} {$value['last_name']}";
 }
 
-foreach($conv['response']['items'] as $value) {
-
+foreach($messages as $value) {
     $author_id = $value['from_id'] ? $value['from_id'] : $value['user_id'];
     ?>
     <div class="panel panel-default">
@@ -83,7 +85,7 @@ foreach($conv['response']['items'] as $value) {
             <? } ?>
             <? if($value['fwd_messages']){ ?>
                 <li class="list-group-item">
-                    <pre><? print_r($value['fwd_messages'])?></pre>
+                    <? makeFwdMessagesDOM($value['fwd_messages'], $user_data); ?>
                 </li>
             <? } ?>
         </ul>
@@ -109,3 +111,34 @@ foreach($conv['response']['items'] as $value) {
 ?>
         </div>
     </div>
+ <?
+
+ function makeFwdMessagesDOM($messages, $user_data) {
+     $messages = array_reverse($messages);
+     foreach($messages as $val) {
+            ?>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="media">
+                        <a target="_blank" class="media-left" href="//vk.com/id<?= $val['user_id'] ?>">
+                            <img src="<?= $user_data["" . $val['user_id']]['photo'] ?>" alt="...">
+                        </a>
+                        <div class="media-body">
+                            <h5 class="media-heading">
+                                <?= $user_data["" . $val['user_id']]['name'] ?>
+                            </h5>
+                            <?
+                            if (isset($val['fwd_messages'])) {
+                                makeFwdMessagesDOM($val['fwd_messages'], $user_data);
+                            } else {
+                                echo normText($val['body']);
+                            }
+                            ?>
+                        </div>
+                    </div>
+                    <span class="pull-right"><?=dateDiffNow($val['date'])?></span>
+                </div>
+            </div>
+ <?
+     }
+ }
