@@ -56,7 +56,7 @@ function isAccessTokenValid($access_token) {
     $vk = new VK();
     $response = $vk->api('users.get', ['access_token' => $access_token], false);
 
-    return (isset($response[0]) && intval($response[0]['uid']) > 0);
+    return (isset($response[0]) && intval($response[0]['id']) > 0);
 }
 function getAppPermissions($access_token) {
     $vk = new VK();
