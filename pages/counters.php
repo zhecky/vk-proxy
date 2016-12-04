@@ -11,7 +11,7 @@
 <?
 
 
-foreach ($counters['response'] as $key => $value) {
+foreach ($counters as $key => $value) {
 ?>
 
     <li class="list-group-item">
