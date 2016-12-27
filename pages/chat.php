@@ -80,7 +80,19 @@ foreach($messages as $value) {
         <ul class="list-group">
             <? if($value['attachments']){ ?>
             <li class="list-group-item">
-                <pre><? print_r($value['attachments'])?></pre>
+                <? foreach($value['attachments'] as $key => $attach) {
+                    if ($attach['type'] == 'photo') { ?>
+                        <img src="<?= getPhotoWithOptimizeSize($attach['photo']) ?>"
+                             onclick="window.open('<?= getPhotoWithMaxSize($attach['photo']) ?>')"
+                             style="cursor: pointer">
+                    <?
+                    } else {
+                        ?>
+                        <pre><? print_r($attach) ?></pre>
+                        <?
+                    }
+                }
+                ?>
             </li>
             <? } ?>
             <? if($value['fwd_messages']){ ?>
@@ -141,4 +153,34 @@ foreach($messages as $value) {
             </div>
  <?
      }
+ }
+
+ /**
+  * @param array $photo_object
+  * @param int   $optimize_size
+  *
+  * @return string
+  */
+ function getPhotoWithOptimizeSize($photo_object, $optimize_size = 400) {
+     $photos = [];
+
+     foreach($photo_object as $key => $value) {
+         if (strpos($key, 'photo_') === 0) {
+             $distance = abs(str_replace('photo_', '', $key) - $optimize_size);
+             $photos[$distance] = $value;
+         }
+     }
+
+     ksort($photos);
+
+     return array_shift($photos);
+}
+
+ /**
+  * @param array $photo_object
+  *
+  * @return string
+  */
+ function getPhotoWithMaxSize($photo_object) {
+     return getPhotoWithOptimizeSize($photo_object, 9999);
  }
