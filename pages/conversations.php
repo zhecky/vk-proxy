@@ -1,6 +1,3 @@
-<?
-?>
-
 <div class="panel panel-default">
     <div class="panel-heading">
         <a class="pull-right" href="" onclick="document.location.reload(); return false;"><span class="glyphicon glyphicon-refresh"></span></a>
@@ -8,8 +5,7 @@
     </div>
     <div class="panel-body">
 
-        <?
-
+        <?php
         $conversations = $vk->api('messages.getDialogs');
         $uids = implode(',', array_column(array_column($conversations, 'message'), 'user_id'));
 
@@ -38,11 +34,11 @@
                         <div class="media-body">
                             <h5 class="media-heading">
                                 <?= $user_data["" . $author_id]['name'] ?>
-                                <? if (trim($value['message']['title']) != "...") { ?>
+                                <?php if (trim($value['message']['title']) != "...") { ?>
                                     <span class="label label-default"><?= $value['message']['title'] ?></span>
-                                <? } ?>
+                                <?php } ?>
                             </h5>
-                            <?
+                            <?php
                                 if (isset($value['message']['fwd_messages'])) {
                                     echo '<span class="label label-info">forwarded messages</span>';
                                 } else {
@@ -55,21 +51,21 @@
                 <ul class="list-group">
                     <li class="list-group-item">
                         <div class="pull-right"><?=dateDiffNow($value['message']['date'])?></div>
-                        <? if ($value['unread'] > 0) { ?>
+                        <?php if ($value['unread'] > 0) { ?>
                             <span class="label label-danger"><?= $value['unread'] ?></span>
-                        <? } ?>
-                        <? if ($value['message']['out'] == 0) { ?>
+                        <?php } ?>
+                        <?php if ($value['message']['out'] == 0) { ?>
                             <span class="label label-primary">inbox</span>
-                        <? } ?>
-                        <? if ($value['message']['read_state'] == 1) { ?>
+                        <?php } ?>
+                        <?php if ($value['message']['read_state'] == 1) { ?>
                             <span class="label label-success">read</span>
-                        <? } ?>
+                        <?php } ?>
                         <div style="clear: both"></div>
                     </li>
                 </ul>
                 <div class="panel-footer">
 
-                    <? $chat_id = ($value['message']['chat_id'] > 0) ? -$value['message']['chat_id'] : $value['message']['user_id']; ?>
+                    <?php $chat_id = ($value['message']['chat_id'] > 0) ? -$value['message']['chat_id'] : $value['message']['user_id']; ?>
 
                     <div class="btn-group pull-right ">
 
@@ -89,10 +85,6 @@
                 </div>
             </div>
 
-        <?
-
-        }
-
-        ?>
+        <?php } ?>
     </div>
 </div>
