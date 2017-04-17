@@ -8,7 +8,7 @@
 
 ?>
     <ul class="list-group">
-<?
+<?php
 
 
 foreach ($counters as $key => $value) {
@@ -19,6 +19,6 @@ foreach ($counters as $key => $value) {
         <?=$key?>
     </li>
 
-<? } ?>
+<?php } ?>
 
     </ul>

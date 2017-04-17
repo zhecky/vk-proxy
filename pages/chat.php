@@ -1,4 +1,4 @@
- <?
+ <?php
  $is_chat = $_GET['id'] < 0;
  $id = abs($_GET['id']);
  ?>
@@ -32,7 +32,7 @@
             </ul>
         <div class="panel-body">
 
-<?
+<?php
 $messages = $vk->api('messages.getHistory', [
    'count' => 200,
     ($is_chat ? 'chat_id' : 'user_id') => $id
@@ -76,42 +76,54 @@ foreach($messages as $value) {
                 </div>
             </div>
         </div>
-        <? if($value['attachments'] || $value['fwd_messages']){ ?>
+        <?php if($value['attachments'] || $value['fwd_messages']){ ?>
         <ul class="list-group">
-            <? if($value['attachments']){ ?>
+            <?php if($value['attachments']){ ?>
             <li class="list-group-item">
-                <pre><? print_r($value['attachments'])?></pre>
+                <?php foreach($value['attachments'] as $key => $attach) {
+                    if ($attach['type'] == 'photo') { ?>
+                        <img src="<?= getPhotoWithOptimizeSize($attach['photo']) ?>"
+                             onclick="window.open('<?= getPhotoWithMaxSize($attach['photo']) ?>')"
+                             style="cursor: pointer">
+                    <?php
+                    } else {
+                        ?>
+                        <pre><?php print_r($attach) ?></pre>
+                        <?php
+                    }
+                }
+                ?>
             </li>
-            <? } ?>
-            <? if($value['fwd_messages']){ ?>
+            <?php } ?>
+            <?php if($value['fwd_messages']){ ?>
                 <li class="list-group-item">
                     <? makeFwdMessagesDOM($value['fwd_messages'], $user_data); ?>
                 </li>
-            <? } ?>
+            <?php } ?>
         </ul>
-        <? } ?>
+        <?php } ?>
         <div class="panel-footer">
-            <? if($value['unread'] > 0){ ?>
+            <?php if($value['unread'] > 0){ ?>
                 <span class="label label-danger"><?=$value['unread']?></span>
-            <? } ?>
-            <? if($value['out'] == 0){ ?>
+            <?php } ?>
+            <?php if($value['out'] == 0){ ?>
                 <span class="label label-primary">inbox</span>
-            <? } ?>
-            <? if($value['read_state'] == 1){ ?>
+            <?php } ?>
+            <?php if($value['read_state'] == 1){ ?>
                 <span class="label label-success">read</span>
-            <? } else { ?>
+            <?php } else { ?>
                 <span class="label label-danger">new</span>
-            <? } ?>
+            <?php } ?>
             <div class="pull-right"><?=dateDiffNow($value['date'])?></div>
         </div>
     </div>
 
-<?
+<?php
 }
 ?>
         </div>
     </div>
- <?
+ <?php
 
  function makeFwdMessagesDOM($messages, $user_data) {
      $messages = array_reverse($messages);
@@ -139,6 +151,36 @@ foreach($messages as $value) {
                     <span class="pull-right"><?=dateDiffNow($val['date'])?></span>
                 </div>
             </div>
- <?
+ <?php
      }
+ }
+
+ /**
+  * @param array $photo_object
+  * @param int   $optimize_size
+  *
+  * @return string
+  */
+ function getPhotoWithOptimizeSize($photo_object, $optimize_size = 400) {
+     $photos = [];
+
+     foreach($photo_object as $key => $value) {
+         if (strpos($key, 'photo_') === 0) {
+             $distance = abs(str_replace('photo_', '', $key) - $optimize_size);
+             $photos[$distance] = $value;
+         }
+     }
+
+     ksort($photos);
+
+     return array_shift($photos);
+}
+
+ /**
+  * @param array $photo_object
+  *
+  * @return string
+  */
+ function getPhotoWithMaxSize($photo_object) {
+     return getPhotoWithOptimizeSize($photo_object, 9999);
  }

@@ -1,13 +1,14 @@
-<?
-
+<?php
 ini_set('default_socket_timeout', 2);
 
 require_once "util.php";
 
 $vk = new VK();
+$last_seen = 0;
 
 if(ACCESS_TOKEN) {
     $counters = $vk->api('account.getCounters', [], false);
+    $last_seen = $vk->api('users.get', ['fields' => 'last_seen'], false)[0]['last_seen']['time'];
 }
 
 ?>
@@ -65,10 +66,11 @@ if(ACCESS_TOKEN) {
 
 
         <!-- Collect the nav links, forms, and other content for toggling -->
-        <? if(ACCESS_TOKEN) { ?>
+        <?php if(ACCESS_TOKEN) { ?>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <?php if ($last_seen) {?><p class="navbar-text">last seen: <strong><?=dateDiffNow($last_seen)?></strong></p><?php } ?>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/conversations">Conversations<?if($counters['messages'] > 0) {?> <span class="label label-primary"><?=$counters['messages']?></span><?}?></a></li>
+                <li><a href="/conversations">Conversations<?php if($counters['messages'] > 0) {?> <span class="label label-primary"><?=$counters['messages']?></span><?php } ?></a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> Debug
                         <span class="caret"></span></a>
@@ -80,7 +82,7 @@ if(ACCESS_TOKEN) {
                 </li>
             </ul>
         </div>
-        <? } ?>
+        <?php } ?>
         <!-- /.navbar-collapse -->
     </div>
     <!-- /.container-fluid -->
@@ -89,7 +91,7 @@ if(ACCESS_TOKEN) {
 <div class="container">
 
     <div class="row">
-        <?
+        <?php
 
         switch($_GET['act']) {
             case 'conversations' :
