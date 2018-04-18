@@ -9,10 +9,9 @@
 require_once "core/class/VK.php";
 require_once "Text.php";
 
-
-
-define("CLIENT_PASS", "vdghdfgsdhsrgbzdfbsdh6576gawyw46u357iuw45");
-define("ACCESS_TOKEN", $_COOKIE['vk_token'] ? decodeString($_COOKIE['vk_token'], CLIENT_PASS) : "");
+define("CLIENT_PASS", "BSJimSXvbME1gHx2x5jrky9IVzu9wG5gQ2TBJlXf");
+define('ALG_NAME', 'aes-256-cbc');
+define("ACCESS_TOKEN", $_COOKIE['vk_token'] ? decodeString($_COOKIE['vk_token'], ALG_NAME, CLIENT_PASS) : "");
 
 function postVKMessage($id, $text) {
     $vk = new VK();
