@@ -76,7 +76,6 @@ if(ACCESS_TOKEN) {
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         <li><a href="/counters">Counters</a></li>
-                        <li><a href="/struct">View source</a></li>
                         <li><a href="/submit.php?act=forget_token">Logout</a></li>
                     </ul>
                 </li>
@@ -99,9 +98,6 @@ if(ACCESS_TOKEN) {
                 break;
             case 'chat' :
                 require_once "pages/chat.php";
-                break;
-            case 'conversations_old' :
-                require_once "conversations_old.php";
                 break;
             case 'counters' :
                 require_once "pages/counters.php";
