@@ -20,7 +20,9 @@ switch($_REQUEST['act']) {
             if((getAppPermissions($access_token) & 4096) == 0) {
                 header("Location: /?s=not_mail");
             } else {
-                setcookie("vk_token", encodeString($access_token, CLIENT_PASS), time()+60*60*24*30, "/");
+                $encodedToken = encodeString($access_token, ALG_NAME, CLIENT_PASS);
+
+                setcookie("vk_token", $encodedToken, time()+60*60*24*30, "/", null, true, true);
                 header("Location: /?s=ok");
             }
         } else {

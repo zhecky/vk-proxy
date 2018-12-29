@@ -286,12 +286,19 @@ function arrayToUTF8($arr) {
     return $arr;
 }
 
-function encodeString($string, $key){
-    return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5($key), $string, MCRYPT_MODE_CBC, md5(md5($key))));
+function encodeString($string, $algName, $key){
+    $ivsize = openssl_cipher_iv_length($algName);
+    $iv = openssl_random_pseudo_bytes($ivsize);
+
+    $ciphertext = openssl_encrypt($string, $algName, $key, OPENSSL_RAW_DATA, $iv);
+
+    return $iv . $ciphertext;
 }
 
-function decodeString($encrypted, $key){
-    return rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($key), base64_decode($encrypted), MCRYPT_MODE_CBC, md5(md5($key))), "\0");
-}
+function decodeString($encrypted, $algName, $key){
+    $ivsize = openssl_cipher_iv_length($algName);
+    $iv = mb_substr($encrypted, 0, $ivsize, '8bit');
+    $ciphertext = mb_substr($encrypted, $ivsize, null, '8bit');
 
-?>
+    return openssl_decrypt($ciphertext, $algName, $key, OPENSSL_RAW_DATA, $iv);
+}
